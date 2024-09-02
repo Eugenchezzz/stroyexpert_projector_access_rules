@@ -1,0 +1,48 @@
+<?php
+
+// МОДУЛЬ ЗАДАЕТ ПРАВИЛА ДЛЯ ДОСТУПА К РАЗДЕЛУ ДЛЯ ПРОЕКТИРОВЩИКА (ЖУРНАЛУ), А ИМЕННО:
+// -ПЕРЕНАПРАВЛЯТЬ ПРИ ПЕРЕХОДЕ (ЕСЛИ ПРОЕКТИРОВЩИК) ИМЕННО НА СТРАНИЦУ ЖУРНАЛА, А НЕ НА РЕДАКЦИЮ ОБЪЕКТА
+// -НЕ РАЗРЕШАТЬ ДОСТУП К ЖУРНАЛУ НИКОМУ КРОМЕ АДМИНА И ПРОЕКТИРОВЩИКА
+
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function projectirovshick_access_rules_preprocess_page(&$variables) {
+    global $user;
+
+    // Проверяем, есть ли у пользователя роль "Проектировщик".
+    if (in_array('Проектировщик', array_values($user->roles))) {
+        // Получаем текущий путь.
+        $current_path = current_path();
+
+        // Определяем регулярное выражение для совпадения URL-адресов, которые нужно перенаправить.
+        $pattern = '/^objects\/edit\/(\d+)\/(work_log_chapter_[1-7]|create_act|work_log_chapters_print)\/?$/';
+
+        // Проверяем, соответствует ли текущий путь одному из шаблонов.
+        if (preg_match($pattern, $current_path, $matches)) {
+            // Извлекаем идентификатор из текущего пути.
+            $id = $matches[1];
+
+            // Формируем новый URL для перенаправления.
+            $redirect_url = 'objects/edit/' . $id . '/journal_nadzora';
+
+            // Добавляем отложенный редирект через JavaScript.
+            drupal_add_js("
+        (function(){
+          setTimeout(function() {
+            window.location.href = '" . url($redirect_url, array('absolute' => TRUE)) . "';
+          }, 1);
+        })();
+      ", 'inline');
+        }
+    }
+}
+
+
+
+
+
+
+
+
