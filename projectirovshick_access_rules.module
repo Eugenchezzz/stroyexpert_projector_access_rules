@@ -1,13 +1,10 @@
 <?php
 
 // МОДУЛЬ ЗАДАЕТ ПРАВИЛА ДЛЯ ДОСТУПА К РАЗДЕЛУ ДЛЯ ПРОЕКТИРОВЩИКА (ЖУРНАЛУ), А ИМЕННО:
-// -ПЕРЕНАПРАВЛЯТЬ ПРИ ПЕРЕХОДЕ (ЕСЛИ ПРОЕКТИРОВЩИК) ИМЕННО НА СТРАНИЦУ ЖУРНАЛА, А НЕ НА РЕДАКЦИЮ ОБЪЕКТА
-// -НЕ РАЗРЕШАТЬ ДОСТУП К ЖУРНАЛУ НИКОМУ КРОМЕ АДМИНА И ПРОЕКТИРОВЩИКА
+// перенаправлять проектировщика сразу на журнал
 
 
-/**
- * Implements hook_preprocess_page().
- */
+
 function projectirovshick_access_rules_preprocess_page(&$variables) {
     global $user;
 
@@ -27,20 +24,22 @@ function projectirovshick_access_rules_preprocess_page(&$variables) {
             // Формируем новый URL для перенаправления.
             $redirect_url = 'objects/edit/' . $id . '/journal_nadzora';
 
-            // Добавляем отложенный редирект через JavaScript.
+            // Добавляем стили и отложенный редирект через JavaScript.
+            drupal_add_html_head(array(
+                '#type' => 'markup',
+                '#markup' => '<style>body { display: none; }</style>',
+            ), 'projectirovshick_access_rules');
+
             drupal_add_js("
-        (function(){
-          setTimeout(function() {
-            window.location.href = '" . url($redirect_url, array('absolute' => TRUE)) . "';
-          }, 1);
-        })();
-      ", 'inline');
+                (function(){
+                    setTimeout(function() {
+                        window.location.href = '" . url($redirect_url, array('absolute' => TRUE)) . "';
+                    }, 0);
+                })();
+            ", 'inline');
         }
     }
 }
-
-
-
 
 
 
